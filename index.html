@@ -164,24 +164,37 @@ let userMarker = null;
 let selectedPlace = null;
 let lastSearchTime = 0;
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19
+// Stabilný HTTPS tile server kompatibilný s Android WebView
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 // --------------------------------------
 // SLEDOVANIE POLOHY
 // --------------------------------------
-navigator.geolocation.watchPosition(pos => {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
+navigator.geolocation.watchPosition(
+    pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
 
-    if (!userMarker) {
-        userMarker = L.marker([lat, lon]).addTo(map);
-        map.setView([lat, lon], 15);
-    } else {
-        userMarker.setLatLng([lat, lon]);
+        if (!userMarker) {
+            userMarker = L.marker([lat, lon]).addTo(map);
+            map.setView([lat, lon], 15);
+        } else {
+            userMarker.setLatLng([lat, lon]);
+        }
+    },
+    err => {
+        console.log("GPS error:", err);
+    },
+    {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000
     }
-});
+);
+	
 
 // --------------------------------------
 // NOMINATIM FALLBACK
